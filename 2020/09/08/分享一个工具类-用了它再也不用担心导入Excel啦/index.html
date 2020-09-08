@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <title>分享一个工具类_用了它再也不用担心导入Excel啦 | K&#39;s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+      <link rel="icon" href="/banner/k3.png">
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<link rel="stylesheet" href="/js/google-code-prettify/tomorrow-night-eighties.min.css">
+
+
+  <meta name="generator" content="Hexo 5.0.2"></head>
+
+  <body>
+
+<header>
+	<a id="logo" href="/" title="K&#39;s blog">
+	<img src="/banner/k3.png" alt="K&#39;s blog"></a>
+	
+	
+		<!--搜索栏-->
+		<i class="js-toggle-search iconfont icon-search"></i>
+
+
+<form class="js-search search-form search-form--modal" method="get" action="http://gushi.li" role="search">
+	<div class="search-form__inner">
+		<div>
+			<i class="iconfont icon-search"></i>
+			<input class="text-input" placeholder="Enter Key..." type="search">
+		</div>
+	</div>
+</form>
+	
+
+	
+		<!--侧边导航栏-->
+		<a id="nav-toggle" href="#"><span></span></a>
+
+<nav>
+	<div class="menu-top-container">
+		<ul id="menu-top" class="menu">
+			
+				
+				<li class="current-menu-item">
+					<a href="http://weibo.com/" target="_blank">Weibo</a>
+				</li>
+			
+		</ul>
+	</div>
+</nav>
+	
+
+</header>
+<div class="m-header ">
+	<section id="hero1" class="hero">
+		<div class="inner">
+		</div>
+	</section>
+	
+		<figure class="top-image" data-enable=true></figure>
+	
+</div>
+
+<!--文章列表-->
+<div class="wrapper">
+  
+    <!--文章-->
+<article>
+	
+  
+    <h1 class="post-title" itemprop="name">
+      分享一个工具类_用了它再也不用担心导入Excel啦
+    </h1>
+  
+
+	<div class='post-body mb'>
+		<h1 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h1><p>gogogo话不多说，如果还没了解过poi的话建议小伙伴可以先了解下poi。</p>
+<h1 id="二、什么是POI"><a href="#二、什么是POI" class="headerlink" title="二、什么是POI?"></a>二、什么是POI?</h1><p>POI是Apache软件基金会用Java编写的免费开源的跨平台的 Java API，Apache POI提供API给Java程序对Microsoft Office格式档案读和写的功能。所以POI的主要功能是可以用Java操作Microsoft Office的相关文件，但是一般我们都是用来操作Excel相关文件。</p>
+<h1 id="三、代码实现"><a href="#三、代码实现" class="headerlink" title="三、代码实现"></a>三、代码实现</h1><h2 id="1-首先呢，我们先导入坐标，引入jar"><a href="#1-首先呢，我们先导入坐标，引入jar" class="headerlink" title="1.首先呢，我们先导入坐标，引入jar"></a>1.首先呢，我们先导入坐标，引入jar</h2><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;!-- excel --&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.poi&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;poi-ooxml&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;4.0.1&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line">&lt;!-- poi --&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.poi&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;poi&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;4.0.1&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-相关类"><a href="#2-相关类" class="headerlink" title="2.相关类"></a>2.相关类</h2><h3 id="pojo—-User"><a href="#pojo—-User" class="headerlink" title="pojo—-User"></a>pojo—-User</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@Data</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> &#123;</span></span><br><span class="line">    @FileAttributes(value = <span class="string">&quot;ID&quot;</span>)</span><br><span class="line">    <span class="keyword">private</span> String id;</span><br><span class="line">    @FileAttributes(value = <span class="string">&quot;名字&quot;</span>)</span><br><span class="line">    <span class="keyword">private</span> String username;</span><br><span class="line">    @FileAttributes(value = <span class="string">&quot;密码&quot;</span>)</span><br><span class="line">    <span class="keyword">private</span> String password;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="注解—-FileAttributes"><a href="#注解—-FileAttributes" class="headerlink" title="注解—-FileAttributes"></a>注解—-FileAttributes</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @description 用于标识对应字符对应文件上的属性</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">@Target(&#123;ElementType.FIELD&#125;)</span><br><span class="line">@Retention(RetentionPolicy.RUNTIME)</span><br><span class="line"><span class="keyword">public</span> @interface FileAttributes &#123;</span><br><span class="line">    <span class="function">String <span class="title">value</span><span class="params">()</span></span>;</span><br><span class="line">    String defualtValue() default &quot;&quot;;</span><br><span class="line">    <span class="function">boolean <span class="title">isNull</span><span class="params">()</span> <span class="keyword">default</span> <span class="literal">true</span></span>;</span><br><span class="line">    Class type() default String.class;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="工具类—-ParsingFileUtils"><a href="#工具类—-ParsingFileUtils" class="headerlink" title="工具类—- ParsingFileUtils"></a>工具类—- ParsingFileUtils</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Created by gyk on 2020/9/8</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ParsingFileUtils</span> &#123;</span></span><br><span class="line">    <span class="comment">//文件后缀</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String FILE_CONTENT_TYPE_XLSX=<span class="string">&quot;xlsx&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String FILE_CONTENT_TYPE_XLS=<span class="string">&quot;xls&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Logger logger= LoggerFactory.getLogger(ParsingFileUtils.class);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 将Excel文件转换成list集合</span></span><br><span class="line"><span class="comment">     * @param in 文件输入流</span></span><br><span class="line"><span class="comment">     * @param suffix 文件后缀</span></span><br><span class="line"><span class="comment">     * @param clazz  文件转换对象类型</span></span><br><span class="line"><span class="comment">     * @return list集合</span></span><br><span class="line"><span class="comment">     * @throws IOException</span></span><br><span class="line"><span class="comment">     * @throws IllegalAccessException</span></span><br><span class="line"><span class="comment">     * @throws InstantiationException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    public static List&lt;Object&gt; parsingFileXls(InputStream in,String suffix,Class clazz) throws IOException, IllegalAccessException, InstantiationException &#123;</span><br><span class="line">        <span class="comment">//获得所有属性对象</span></span><br><span class="line">        Field[] fields = clazz.getDeclaredFields();</span><br><span class="line">        ConcurrentHashMap&lt;String,Integer&gt; titlesMap=<span class="keyword">new</span> ConcurrentHashMap&lt;&gt;(<span class="number">8</span>);</span><br><span class="line">        Workbook book;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//判断文件类型，进行对象构造</span></span><br><span class="line">            <span class="keyword">if</span> (FILE_CONTENT_TYPE_XLSX.equals(suffix)) &#123;</span><br><span class="line">                book = <span class="keyword">new</span> XSSFWorkbook(in);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (FILE_CONTENT_TYPE_XLS.equals(suffix)) &#123;</span><br><span class="line">                book = <span class="keyword">new</span> HSSFWorkbook(in);</span><br><span class="line">            &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">&quot;file type error!&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">catch</span> (IOException e)&#123;</span><br><span class="line">            logger.error(e.getLocalizedMessage());</span><br><span class="line">            <span class="keyword">throw</span> e;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//此处获取第一个sheet页进行操作，如需要多sheet页操作，将其变成for循环</span></span><br><span class="line">        Sheet sheet =book.getSheetAt(<span class="number">0</span>);</span><br><span class="line">        <span class="comment">//从类中属性注解进行字段-标题映射</span></span><br><span class="line">        <span class="keyword">for</span> (Field field:fields)&#123;</span><br><span class="line">            <span class="comment">//field 代表类的成员变量</span></span><br><span class="line">            <span class="comment">// getAnnotation(Class&lt;A&gt; annotationClass)返回该类中与参数类型匹配的公有注解对象</span></span><br><span class="line">            FileAttributes fileAttributes = field.getAnnotation(FileAttributes.class);</span><br><span class="line">            <span class="keyword">if</span> (fileAttributes==null)&#123;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            titlesMap.put(fileAttributes.value(),<span class="number">-1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//将字段对应标题所述的列进行映射   getRow(sheet.getFirstRowNum())获取第一行标题</span></span><br><span class="line">        mappingColumns(titlesMap,sheet.getRow(sheet.getFirstRowNum()));</span><br><span class="line">        List&lt;Object&gt; result =<span class="keyword">new</span> ArrayList&lt;&gt;(<span class="number">8</span>);</span><br><span class="line">        <span class="comment">//遍历所有行，进行添加值。</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=sheet.getFirstRowNum()+<span class="number">1</span>;i&lt;sheet.getLastRowNum()+<span class="number">1</span>;i++)&#123;</span><br><span class="line">            <span class="comment">//获取行数</span></span><br><span class="line">            Row row = sheet.getRow(i);</span><br><span class="line">            <span class="comment">//创建类的实例</span></span><br><span class="line">            Object target = clazz.newInstance();</span><br><span class="line">            <span class="comment">//解析每一列，并将列属性给对象赋值</span></span><br><span class="line">            parsingRow(titlesMap, row, fields, target);</span><br><span class="line">            <span class="keyword">if</span>(target!=null) &#123;</span><br><span class="line">                result.add(target);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @param titleMap 列与字段映射集合</span></span><br><span class="line"><span class="comment">     * @param row 列标题</span></span><br><span class="line"><span class="comment">     * @return</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">mappingColumns</span><span class="params">(ConcurrentHashMap&lt;String,Integer&gt; titleMap, Row row)</span></span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=row.getFirstCellNum();i&lt;row.getLastCellNum();i++)&#123;</span><br><span class="line">            <span class="comment">//获取当前单元格</span></span><br><span class="line">            Cell cell = row.getCell(i);</span><br><span class="line">            Integer integer = titleMap.get(cell.getStringCellValue());</span><br><span class="line">            <span class="keyword">if</span> (integer != null)&#123;</span><br><span class="line">                <span class="comment">//重新赋值 key(标题) 的value会被重新覆盖 之前都是-1</span></span><br><span class="line">                titleMap.put(cell.getStringCellValue(),i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * @param titleMap 列与字段映射集合</span></span><br><span class="line"><span class="comment">     * @param row 每一行数据</span></span><br><span class="line"><span class="comment">     * @param fields 目标对象属性集合</span></span><br><span class="line"><span class="comment">     * @param target 目标对象</span></span><br><span class="line"><span class="comment">     * @throws IllegalArgumentException</span></span><br><span class="line"><span class="comment">     * @throws IllegalAccessException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    private static void parsingRow(ConcurrentHashMap&lt;String,Integer&gt; titleMap, Row row, Field[] fields, Object target) throws IllegalArgumentException, IllegalAccessException &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (Field field:fields)&#123;</span><br><span class="line">            <span class="comment">//field 代表类的成员变量</span></span><br><span class="line">            FileAttributes fieldAnnotation = field.getAnnotation(FileAttributes.class);</span><br><span class="line">            <span class="keyword">if</span> (fieldAnnotation == null)&#123;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//作用就是让我们在用反射时 可以访问private修饰的私有属性</span></span><br><span class="line">            field.setAccessible(<span class="literal">true</span>);</span><br><span class="line">            <span class="keyword">if</span> (!StringUtils.isEmpty(fieldAnnotation.defualtValue()))&#123;</span><br><span class="line">                field.<span class="built_in">set</span>(target,fieldAnnotation.defualtValue());</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//通过标题名拿到对应标题的value索引值</span></span><br><span class="line">            Integer integer = titleMap.get(fieldAnnotation.value());</span><br><span class="line">            <span class="keyword">if</span> (integer==<span class="number">-1</span>)&#123;</span><br><span class="line">                <span class="keyword">if</span> (!fieldAnnotation.isNull()&amp;&amp;StringUtils.isEmpty(fieldAnnotation.defualtValue()))&#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">&quot;we need  &quot;</span>+fieldAnnotation.value()+<span class="string">&quot; ,but the excel doesn&#x27;t!&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//获取标题名这一列值</span></span><br><span class="line">            Cell cell = row.getCell(integer);</span><br><span class="line">            <span class="comment">//o 接受的是匹配类型后的单元格内容</span></span><br><span class="line">            Object o = parsingCell(cell, fieldAnnotation);</span><br><span class="line">            <span class="keyword">if</span> (o==null&amp;&amp;!fieldAnnotation.isNull())&#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">&quot;the （&quot;</span>+row.getRowNum()+<span class="string">&quot;,&quot;</span>+integer+<span class="string">&quot;）cell Not allowed to be empty&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        <span class="comment">//对target进行赋值</span></span><br><span class="line">            field.<span class="built_in">set</span>(target,o);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * @param cell 单元格</span></span><br><span class="line"><span class="comment">     * @param fileAttributes 注解类型</span></span><br><span class="line"><span class="comment">     * @return 注解中type属性类型</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Object <span class="title">parsingCell</span><span class="params">(Cell cell, FileAttributes fileAttributes)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (cell==null)&#123;</span><br><span class="line">            <span class="keyword">return</span> null;</span><br><span class="line">        &#125;</span><br><span class="line">        Class type = fileAttributes.type();</span><br><span class="line">        <span class="keyword">if</span> (type ==Date.class)&#123;</span><br><span class="line">            <span class="keyword">return</span> cell.getDateCellValue();</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span>(type== boolean.class)&#123;</span><br><span class="line">            <span class="keyword">return</span> cell.getBooleanCellValue();</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span>(type==<span class="keyword">double</span>.class)&#123;</span><br><span class="line">            <span class="keyword">return</span> cell.getNumericCellValue();</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span>(type== RichTextString.class)&#123;</span><br><span class="line">            <span class="keyword">return</span> cell.getRichStringCellValue();</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span>(type==Integer.class)&#123;</span><br><span class="line">            String stringCellValue = cell.getStringCellValue();</span><br><span class="line">            <span class="keyword">return</span> Integer.parseInt(stringCellValue);</span><br><span class="line">        &#125; <span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> cell.getStringCellValue();</span><br><span class="line">            &#125;<span class="keyword">catch</span> (Exception e)&#123;</span><br><span class="line">                <span class="keyword">if</span> (cell.getCellType()==CellType.NUMERIC) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="string">&quot;&quot;</span>+cell.getNumericCellValue();</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="四、代码实现了，是不是已经迫不及待想试试水了呢"><a href="#四、代码实现了，是不是已经迫不及待想试试水了呢" class="headerlink" title="四、代码实现了，是不是已经迫不及待想试试水了呢"></a>四、代码实现了，是不是已经迫不及待想试试水了呢</h1><p>接下来我们测试一下</p>
+<h3 id="用户表-xlsx："><a href="#用户表-xlsx：" class="headerlink" title="用户表.xlsx："></a>用户表.xlsx：</h3><p><img src="https://img-blog.csdnimg.cn/2020090813233180.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDM1NTg1NQ==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="五、解析过程"><a href="#五、解析过程" class="headerlink" title="五、解析过程"></a>五、解析过程</h1><p>我们来写一个优雅的main方法测试一下这个工具类行不行</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) throws IOException, IllegalAccessException, InstantiationException &#123;</span><br><span class="line">      List&lt;Object&gt; objects = parsingFileXls(<span class="keyword">new</span> FileInputStream(<span class="keyword">new</span> File(<span class="string">&quot;G:\\用户表.xlsx&quot;</span>)), FILE_CONTENT_TYPE_XLSX, User.class);</span><br><span class="line">      objects.forEach(System.out::println);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>果然行！！！</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">User(id=<span class="number">1.0</span>, username= 张三, password=<span class="number">2</span>sd3tg5)</span><br><span class="line">User(id=<span class="number">2.0</span>, username= 李四, password=<span class="number">42f</span>reg43)</span><br><span class="line">User(id=<span class="number">3.0</span>, username= 王五, password=<span class="number">2</span>d3d)</span><br><span class="line">User(id=<span class="number">4.0</span>, username= 赵六, password= asdad)</span><br><span class="line">User(id=<span class="number">5.0</span>, username= 刘七, password= sefwe)</span><br><span class="line">User(id=<span class="number">6.0</span>, username= kk, password= <span class="number">21</span>edwq)</span><br><span class="line">User(id=<span class="number">7.0</span>, username= sx, password= dewr3r)</span><br><span class="line">User(id=<span class="number">8.0</span>, username= aa, password= wegt6y)</span><br><span class="line">User(id=<span class="number">9.0</span>, username= bb, password= qwed2qw)</span><br><span class="line">User(id=<span class="number">10.0</span>, username= cc, password= <span class="number">21</span>edwq)</span><br></pre></td></tr></table></figure>
+
+<p>收好你们的对象噢</p>
+
+	</div>
+	<div class="meta split">
+		
+			<span>本文总阅读量 <span id="busuanzi_value_page_pv"></span> 次</span>
+		
+		<time class="post-date" datetime="2020-09-08T06:49:07.000Z" itemprop="datePublished">2020-09-08</time>
+	</div>
+	<!-- //评论 -->
+	<!-- <div id="container"></div>
+	<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+	<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+	<script>
+	var gitment = new Gitment({
+		owner: '8abe807a7eec14fcbe3dbbe48483a61f0d32008a ',
+		repo: 'kk-arch.github.io',
+		oauth: {
+			client_id: 'f8539174d7a553475267',
+			client_secret: '0d6ca0b43bdc1dbdf34f85ef212726f56a8a1e0a',
+		},
+	})
+	gitment.render('container') -->
+	</script>
+
+</article>
+
+<!--评论-->
+
+
+  
+</div>
+
+
+  <svg id="bigTriangleColor" width="100%" height="40" viewBox="0 0 100 102" preserveAspectRatio="none">
+    <path d="M0 0 L50 100 L100 0 Z"></path>
+  </svg>
+
+  
+
+
+  <div class="wrapper"></div>
+
+
+
+
+
+<div class="fat-footer">
+	<div class="wrapper">
+		<div class="layout layout--center">
+			<div class="layout__item palm-mb">
+				<div class="media">
+					<img class="headimg" src='/banner/k4.png' alt='k'>
+					<div class="media__body">
+						<h4>一个懒人..</h4>
+						<p class='site-description'>Stay Hungry,Stay Sober.</p>
+					</div>
+				</div>
+				<div class="author-contact">
+					<ul>
+						
+							
+							<li>
+				        		<a href="http://weibo.com/" target="_blank">
+				        			
+				        				<i class="iconfont icon-weibo"></i>
+				        			
+				        		</a>
+				        	</li>
+						
+							
+							<li>
+				        		<a href="https://github.com/" target="_blank">
+				        			
+				        				<i class="iconfont icon-github"></i>
+				        			
+				        		</a>
+				        	</li>
+						
+							
+							<li>
+				        		<a href="https://www.zhihu.com/" target="_blank">
+				        			
+										<i class="iconfont icon-zhihu"></i>
+				        			
+				        		</a>
+				        	</li>
+						
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<footer class="footer" role="contentinfo">
+	<div class="wrapper wrapper--wide split split--responsive">
+		
+			<!-- <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span> -->
+			<span>本站总访问量 <span id="busuanzi_value_site_pv"></span> 次, 访客数 <span id="busuanzi_value_site_uv"></span> 人次</span>
+		
+		<!-- <span>Theme by <a target="_blank" rel="noopener" href="http://github.com/kk-arch">justpsvm</a>. Powered by <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></span> -->
+	</div>
+</footer>
+
+	<!-－这里导入了 lib.js 里面涵盖了 jQuery 等框架 所以注释掉-->
+	<!--
+<script src="http://lib.sinaapp.com/js/jquery/2.0/jquery.min.js"></script>
+-->
+	
+<script src="/js/lib.js"></script>
+
+	
+<script src="/js/google-code-prettify/prettify.js"></script>
+
+	
+<script src="/js/module.js"></script>
+
+	
+<script src="/js/script.js"></script>
+
+	
+		<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+	
+	<script type='text/javascript'>
+		//代码高亮
+		$(document).ready(function(){
+	 		$('pre').addClass('prettyprint linenums').attr('style', 'overflow:auto;');
+   			prettyPrint();
+		});
+	</script>
+	</body>
+</html>
