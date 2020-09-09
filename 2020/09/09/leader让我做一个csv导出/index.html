@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <title>leader让我做一个csv导出 | K&#39;s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+      <link rel="icon" href="/banner/k3.png">
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<link rel="stylesheet" href="/js/google-code-prettify/tomorrow-night-eighties.min.css">
+
+
+  <meta name="generator" content="Hexo 5.0.2"></head>
+
+  <body>
+
+<header>
+	<a id="logo" href="/" title="K&#39;s blog">
+	<img src="/banner/k3.png" alt="K&#39;s blog"></a>
+	
+	
+		<!--搜索栏-->
+		<i class="js-toggle-search iconfont icon-search"></i>
+
+
+<form class="js-search search-form search-form--modal" method="get" action="http://gushi.li" role="search">
+	<div class="search-form__inner">
+		<div>
+			<i class="iconfont icon-search"></i>
+			<input class="text-input" placeholder="Enter Key..." type="search">
+		</div>
+	</div>
+</form>
+	
+
+	
+		<!--侧边导航栏-->
+		<a id="nav-toggle" href="#"><span></span></a>
+
+<nav>
+	<div class="menu-top-container">
+		<ul id="menu-top" class="menu">
+			
+				
+				<li class="current-menu-item">
+					<a href="http://weibo.com/" target="_blank">Weibo</a>
+				</li>
+			
+		</ul>
+	</div>
+</nav>
+	
+
+</header>
+<div class="m-header ">
+	<section id="hero1" class="hero">
+		<div class="inner">
+		</div>
+	</section>
+	
+		<figure class="top-image" data-enable=true></figure>
+	
+</div>
+
+<!--文章列表-->
+<div class="wrapper">
+  
+    <!--文章-->
+<article>
+	
+  
+    <h1 class="post-title" itemprop="name">
+      leader让我做一个csv导出
+    </h1>
+  
+
+	<div class='post-body mb'>
+		<h1 id="csv导出文件"><a href="#csv导出文件" class="headerlink" title="csv导出文件"></a>csv导出文件</h1><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>公司有个需求让做csv格式的导出，因为之前做导出默认都是xlsx格式的，并没有了解过csv，后来简单了解后csv就是以”,”分隔的文本，可以直接用txt文本打开浏览数据。</p>
+<p>姓名，年龄，性别,<br>张三，20，男，<br>李xx，22，男，<br>李xx，23，男，<br>李xx，22，男，</p>
+<h3 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h3><pre><code>public class CsvExportUtil &#123;
+  private CsvExportUtil()&#123;&#125;
+
+  /**
+   * 列分隔符
+   */
+  private static final String CSV_COLUMN_SEPARATOR = &quot;,&quot;;
+
+  /**
+   * 行分隔符
+   */
+  private static final String CSV_ROW_SEPARATOR = &quot;\r\n&quot;;
+
+  private static  final Logger LOG = LoggerFactory.getLogger(CsvExportUtil.class);
+  /**
+   * @param dataList 集合数据
+   * @param titles   表头数据
+   * @param keys     字段名
+   * @param os       输出流
+   */
+  public static void doExport(List&lt;Map&lt;String, Object&gt;&gt; dataList, String titles, String keys, OutputStream os) throws Exception &#123;
+
+      StringBuilder buf = new StringBuilder();
+
+      String[] titleArr = titles.split(&quot;,&quot;);
+      String[] keyArr = keys.split(&quot;,&quot;);
+
+      // 组装表头
+      for (String title : titleArr) &#123;
+          buf.append(title).append(CSV_COLUMN_SEPARATOR);
+      &#125;
+      buf.append(CSV_ROW_SEPARATOR);
+
+      // 组装数据
+      if (CollectionUtils.isNotEmpty(dataList)) &#123;
+          for (Map&lt;String, Object&gt; data : dataList) &#123;
+              for (String key : keyArr) &#123;
+                  String o = (String) data.get(key);
+                  //如果数据为空跳过
+                  if(StringUtils.isEmpty(o))&#123;
+                      buf.append(CSV_COLUMN_SEPARATOR);
+                      continue;
+                  &#125;
+                  //查看数据是否存在逗号 存在就做特殊处理
+                  if(!StringUtils.isEmpty(o) &amp;&amp; o.contains(&quot;,&quot;))&#123;
+                      if(o.contains(&quot;\&quot;&quot;))&#123;
+                          o=o.replace(&quot;\&quot;&quot;, &quot;\&quot;\&quot;&quot;);
+                      &#125;
+                      o=&quot;\&quot;&quot;+o+&quot;\&quot;&quot;;
+                  &#125;
+                  buf.append(o).append(CSV_COLUMN_SEPARATOR);
+              &#125;
+              buf.append(CSV_ROW_SEPARATOR);
+          &#125;
+      &#125;
+
+      // 写出响应
+      os.write(buf.toString().getBytes(&quot;GBK&quot;));
+      os.flush();
+  &#125;
+
+  /**
+   * 设置请求头Header
+   *
+   * @param fileName 文件名称
+   * @param response 响应
+   */
+  public static void responseSetProperties( String fileName, HttpServletResponse response) &#123;
+      // 设置文件后缀
+      SimpleDateFormat sdf = new SimpleDateFormat(&quot;yyyyMMddHHmmss&quot;);
+      String fn = fileName + sdf.format(new Date()) + &quot;.csv&quot;;
+      // 设置响应
+      response.setContentType(&quot;application/octet-stream&quot;);
+      response.setCharacterEncoding( &quot;UTF-8&quot;);
+      response.setHeader(&quot;Access-Control-Expose-Headers&quot;,&quot;fileName&quot;);
+      response.setHeader(&quot;Pragma&quot;, &quot;public&quot;);
+      response.setHeader(&quot;Cache-Control&quot;, &quot;max-age=30&quot;);
+      try &#123;
+          response.setHeader(&quot;Content-Disposition&quot;, &quot;attachment; filename=&quot; + URLEncoder.encode(fn,&quot;utf-8&quot;));
+      &#125; catch (UnsupportedEncodingException e) &#123;
+          LOG.error(e.getLocalizedMessage());
+      &#125;
+      response.setHeader(&quot;filename&quot;,fn);
+    &#125;
+&#125;</code></pre>
+<h3 id="调用方法"><a href="#调用方法" class="headerlink" title="调用方法"></a>调用方法</h3><pre><code>  //查询相关数据
+  List&lt;OperationLog&gt; operationLogs = serivce.queryOperationLog(item);
+  //设置表头
+  String titles = &quot;工号,姓名,年龄&quot;;
+  //设置每列字段
+  String keys = &quot;jobNo,name,age&quot;;
+
+  //构造导出数据
+  List&lt;Map&lt;String, Object&gt;&gt; datas = new ArrayList&lt;&gt;();
+  Map&lt;String, Object&gt; map = null;
+  for (OperationLog data : operationLogs) &#123;
+    map = new HashMap&lt;&gt;();
+    map.put(&quot;jobNo&quot;, data.getJobNo());
+    map.put(&quot;name&quot;,data.getName());
+    map.put(&quot;age&quot;,data.getAge());
+    datas.add(map);
+  &#125;
+  //文件导出
+  try &#123;
+    OutputStream os = response.getOutputStream();
+    CsvExportUtil.responseSetProperties(FILE_NAME, response);
+    CsvExportUtil.doExport(datas, titles, keys, os);
+    os.close();
+  &#125; catch (Exception e) &#123;
+    return successResponse(e.getMessage());
+  &#125;
+  return successResponse(BizResponseEnum.SUCCESS_RESPONSE);</code></pre>
+<h3 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h3><p>测试的时候遇到一个问题，有些数据是有逗号(“,”)的，导致导出的数据对应不齐，在过程中添加了判断数据是否包含”,”，这样就保证导出数据没有问题了。</p>
+
+	</div>
+	<div class="meta split">
+		
+			<span>本文总阅读量 <span id="busuanzi_value_page_pv"></span> 次</span>
+		
+		<time class="post-date" datetime="2020-09-09T02:11:59.000Z" itemprop="datePublished">2020-09-09</time>
+	</div>
+	<!-- //评论 -->
+	<!-- <div id="container"></div>
+	<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+	<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+	<script>
+	var gitment = new Gitment({
+		owner: '8abe807a7eec14fcbe3dbbe48483a61f0d32008a ',
+		repo: 'kk-arch.github.io',
+		oauth: {
+			client_id: 'f8539174d7a553475267',
+			client_secret: '0d6ca0b43bdc1dbdf34f85ef212726f56a8a1e0a',
+		},
+	})
+	gitment.render('container') -->
+	</script>
+
+</article>
+
+<!--评论-->
+
+
+  
+</div>
+
+
+  <svg id="bigTriangleColor" width="100%" height="40" viewBox="0 0 100 102" preserveAspectRatio="none">
+    <path d="M0 0 L50 100 L100 0 Z"></path>
+  </svg>
+
+  
+
+
+  <div class="wrapper"></div>
+
+
+
+
+
+<div class="fat-footer">
+	<div class="wrapper">
+		<div class="layout layout--center">
+			<div class="layout__item palm-mb">
+				<div class="media">
+					<img class="headimg" src='/banner/k4.png' alt='k'>
+					<div class="media__body">
+						<h4>一个懒人..</h4>
+						<p class='site-description'>Stay Hungry,Stay Sober.</p>
+					</div>
+				</div>
+				<div class="author-contact">
+					<ul>
+						
+							
+							<li>
+				        		<a href="http://weibo.com/" target="_blank">
+				        			
+				        				<i class="iconfont icon-weibo"></i>
+				        			
+				        		</a>
+				        	</li>
+						
+							
+							<li>
+				        		<a href="https://github.com/" target="_blank">
+				        			
+				        				<i class="iconfont icon-github"></i>
+				        			
+				        		</a>
+				        	</li>
+						
+							
+							<li>
+				        		<a href="https://www.zhihu.com/" target="_blank">
+				        			
+										<i class="iconfont icon-zhihu"></i>
+				        			
+				        		</a>
+				        	</li>
+						
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<footer class="footer" role="contentinfo">
+	<div class="wrapper wrapper--wide split split--responsive">
+		
+			<!-- <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span> -->
+			<span>本站总访问量 <span id="busuanzi_value_site_pv"></span> 次, 访客数 <span id="busuanzi_value_site_uv"></span> 人次</span>
+		
+		<!-- <span>Theme by <a target="_blank" rel="noopener" href="http://github.com/kk-arch">justpsvm</a>. Powered by <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></span> -->
+	</div>
+</footer>
+
+	<!-－这里导入了 lib.js 里面涵盖了 jQuery 等框架 所以注释掉-->
+	<!--
+<script src="http://lib.sinaapp.com/js/jquery/2.0/jquery.min.js"></script>
+-->
+	
+<script src="/js/lib.js"></script>
+
+	
+<script src="/js/google-code-prettify/prettify.js"></script>
+
+	
+<script src="/js/module.js"></script>
+
+	
+<script src="/js/script.js"></script>
+
+	
+		<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+	
+	<script type='text/javascript'>
+		//代码高亮
+		$(document).ready(function(){
+	 		$('pre').addClass('prettyprint linenums').attr('style', 'overflow:auto;');
+   			prettyPrint();
+		});
+	</script>
+	</body>
+</html>

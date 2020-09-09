@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <title>分享一个工具类~用了它再也不用担心导入Excel啦 | K&#39;s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+      <link rel="icon" href="/banner/k3.png">
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<link rel="stylesheet" href="/js/google-code-prettify/tomorrow-night-eighties.min.css">
+
+
+  <meta name="generator" content="Hexo 5.0.2"></head>
+
+  <body>
+
+<header>
+	<a id="logo" href="/" title="K&#39;s blog">
+	<img src="/banner/k3.png" alt="K&#39;s blog"></a>
+	
+	
+		<!--搜索栏-->
+		<i class="js-toggle-search iconfont icon-search"></i>
+
+
+<form class="js-search search-form search-form--modal" method="get" action="http://gushi.li" role="search">
+	<div class="search-form__inner">
+		<div>
+			<i class="iconfont icon-search"></i>
+			<input class="text-input" placeholder="Enter Key..." type="search">
+		</div>
+	</div>
+</form>
+	
+
+	
+		<!--侧边导航栏-->
+		<a id="nav-toggle" href="#"><span></span></a>
+
+<nav>
+	<div class="menu-top-container">
+		<ul id="menu-top" class="menu">
+			
+				
+				<li class="current-menu-item">
+					<a href="http://weibo.com/" target="_blank">Weibo</a>
+				</li>
+			
+		</ul>
+	</div>
+</nav>
+	
+
+</header>
+<div class="m-header ">
+	<section id="hero1" class="hero">
+		<div class="inner">
+		</div>
+	</section>
+	
+		<figure class="top-image" data-enable=true></figure>
+	
+</div>
+
+<!--文章列表-->
+<div class="wrapper">
+  
+    <!--文章-->
+<article>
+	
+  
+    <h1 class="post-title" itemprop="name">
+      分享一个工具类~用了它再也不用担心导入Excel啦
+    </h1>
+  
+
+	<div class='post-body mb'>
+		<h1 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h1><p>gogogo话不多说，如果还没了解过poi的话建议小伙伴可以先了解下poi。</p>
+<h1 id="二、什么是POI"><a href="#二、什么是POI" class="headerlink" title="二、什么是POI?"></a>二、什么是POI?</h1><p>POI是Apache软件基金会用Java编写的免费开源的跨平台的 Java API，Apache POI提供API给Java程序对Microsoft Office格式档案读和写的功能。所以POI的主要功能是可以用Java操作Microsoft Office的相关文件，但是一般我们都是用来操作Excel相关文件。</p>
+<h1 id="三、代码实现"><a href="#三、代码实现" class="headerlink" title="三、代码实现"></a>三、代码实现</h1><h2 id="1-首先呢，我们先导入坐标，引入jar"><a href="#1-首先呢，我们先导入坐标，引入jar" class="headerlink" title="1.首先呢，我们先导入坐标，引入jar"></a>1.首先呢，我们先导入坐标，引入jar</h2><pre><code>&lt;!-- excel --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.apache.poi&lt;/groupId&gt;
+    &lt;artifactId&gt;poi-ooxml&lt;/artifactId&gt;
+    &lt;version&gt;4.0.1&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!-- poi --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.apache.poi&lt;/groupId&gt;
+    &lt;artifactId&gt;poi&lt;/artifactId&gt;
+    &lt;version&gt;4.0.1&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+<h2 id="2-相关类"><a href="#2-相关类" class="headerlink" title="2.相关类"></a>2.相关类</h2><h3 id="pojo—-User"><a href="#pojo—-User" class="headerlink" title="pojo—-User"></a>pojo—-User</h3><pre><code>@Data
+public class User &#123;
+  @FileAttributes(value = &quot;ID&quot;)
+  private String id;
+  @FileAttributes(value = &quot;名字&quot;)
+  private String username;
+  @FileAttributes(value = &quot;密码&quot;)
+  private String password;
+&#125;</code></pre>
+<h3 id="注解—-FileAttributes"><a href="#注解—-FileAttributes" class="headerlink" title="注解—-FileAttributes"></a>注解—-FileAttributes</h3><pre><code>/**
+* @description 用于标识对应字符对应文件上的属性
+*/
+@Target(&#123;ElementType.FIELD&#125;)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface FileAttributes &#123;
+  String value();
+  String defualtValue() default &quot;&quot;;
+  boolean isNull() default true;
+  Class type() default String.class;
+&#125;</code></pre>
+<h3 id="工具类—-ParsingFileUtils"><a href="#工具类—-ParsingFileUtils" class="headerlink" title="工具类—- ParsingFileUtils"></a>工具类—- ParsingFileUtils</h3><pre><code>public class ParsingFileUtils &#123;
+  //文件后缀
+  private static final String FILE_CONTENT_TYPE_XLSX=&quot;xlsx&quot;;
+  private static final String FILE_CONTENT_TYPE_XLS=&quot;xls&quot;;
+  private static Logger logger= LoggerFactory.getLogger(ParsingFileUtils.class);
+
+  /**
+   * 将Excel文件转换成list集合
+   * @param in 文件输入流
+   * @param suffix 文件后缀
+   * @param clazz  文件转换对象类型
+   * @return list集合
+   * @throws IOException
+   * @throws IllegalAccessException
+   * @throws InstantiationException
+   */
+  public static List&lt;Object&gt; parsingFileXls(InputStream in,String suffix,Class clazz) throws IOException, IllegalAccessException, InstantiationException &#123;
+      //获得所有属性对象
+      Field[] fields = clazz.getDeclaredFields();
+      ConcurrentHashMap&lt;String,Integer&gt; titlesMap=new ConcurrentHashMap&lt;&gt;(8);
+      Workbook book;
+      try &#123;
+          //判断文件类型，进行对象构造
+          if (FILE_CONTENT_TYPE_XLSX.equals(suffix)) &#123;
+              book = new XSSFWorkbook(in);
+          &#125; else if (FILE_CONTENT_TYPE_XLS.equals(suffix)) &#123;
+              book = new HSSFWorkbook(in);
+          &#125;else &#123;
+              throw new IllegalArgumentException(&quot;file type error!&quot;);
+          &#125;
+      &#125;catch (IOException e)&#123;
+          logger.error(e.getLocalizedMessage());
+          throw e;
+      &#125;
+      //此处获取第一个sheet页进行操作，如需要多sheet页操作，将其变成for循环
+      Sheet sheet =book.getSheetAt(0);
+      //从类中属性注解进行字段-标题映射
+      for (Field field:fields)&#123;
+          //field 代表类的成员变量
+          // getAnnotation(Class&lt;A&gt; annotationClass)返回该类中与参数类型匹配的公有注解对象
+          FileAttributes fileAttributes = field.getAnnotation(FileAttributes.class);
+          if (fileAttributes==null)&#123;
+              continue;
+          &#125;
+          titlesMap.put(fileAttributes.value(),-1);
+      &#125;
+      //将字段对应标题所述的列进行映射   getRow(sheet.getFirstRowNum())获取第一行标题
+      mappingColumns(titlesMap,sheet.getRow(sheet.getFirstRowNum()));
+      List&lt;Object&gt; result =new ArrayList&lt;&gt;(8);
+      //遍历所有行，进行添加值。
+      for (int i=sheet.getFirstRowNum()+1;i&lt;sheet.getLastRowNum()+1;i++)&#123;
+          //获取行数
+          Row row = sheet.getRow(i);
+          //创建类的实例
+          Object target = clazz.newInstance();
+          //解析每一列，并将列属性给对象赋值
+          parsingRow(titlesMap, row, fields, target);
+          if(target!=null) &#123;
+              result.add(target);
+          &#125;
+      &#125;
+      return result;
+  &#125;
+
+  /**
+   * @param titleMap 列与字段映射集合
+   * @param row 列标题
+   * @return
+   */
+  private static void mappingColumns(ConcurrentHashMap&lt;String,Integer&gt; titleMap, Row row)&#123;
+      for (int i=row.getFirstCellNum();i&lt;row.getLastCellNum();i++)&#123;
+          //获取当前单元格
+          Cell cell = row.getCell(i);
+          Integer integer = titleMap.get(cell.getStringCellValue());
+          if (integer != null)&#123;
+              //重新赋值 key(标题) 的value会被重新覆盖 之前都是-1
+              titleMap.put(cell.getStringCellValue(),i);
+          &#125;
+      &#125;
+
+  &#125;
+
+  /**
+   *
+   * @param titleMap 列与字段映射集合
+   * @param row 每一行数据
+   * @param fields 目标对象属性集合
+   * @param target 目标对象
+   * @throws IllegalArgumentException
+   * @throws IllegalAccessException
+   */
+private static void parsingRow(ConcurrentHashMap&lt;String,Integer&gt; titleMap, Row row, Field[] fields, Object target) throws IllegalArgumentException, IllegalAccessException &#123;
+
+    for (Field field:fields)&#123;
+        //field 代表类的成员变量
+        FileAttributes fieldAnnotation = field.getAnnotation(FileAttributes.class);
+        if (fieldAnnotation == null)&#123;
+            continue;
+        &#125;
+        //作用就是让我们在用反射时 可以访问private修饰的私有属性
+        field.setAccessible(true);
+        if (!StringUtils.isEmpty(fieldAnnotation.defualtValue()))&#123;
+            field.set(target,fieldAnnotation.defualtValue());
+        &#125;
+        //通过标题名拿到对应标题的value索引值
+        Integer integer = titleMap.get(fieldAnnotation.value());
+        if (integer==-1)&#123;
+            if (!fieldAnnotation.isNull()&amp;&amp;StringUtils.isEmpty(fieldAnnotation.defualtValue()))&#123;
+                throw new IllegalArgumentException(&quot;we need  &quot;+fieldAnnotation.value()+&quot; ,but the excel doesn&#39;t!&quot;);
+            &#125;
+            continue;
+        &#125;
+        //获取标题名这一列值
+        Cell cell = row.getCell(integer);
+        //o 接受的是匹配类型后的单元格内容
+        Object o = parsingCell(cell, fieldAnnotation);
+        if (o==null&amp;&amp;!fieldAnnotation.isNull())&#123;
+            throw new IllegalArgumentException(&quot;the （&quot;+row.getRowNum()+&quot;,&quot;+integer+&quot;）cell Not allowed to be empty&quot;);
+        &#125;
+        //对target进行赋值
+        field.set(target,o);
+    &#125;
+&#125;
+
+  /**
+   *
+   * @param cell 单元格
+   * @param fileAttributes 注解类型
+   * @return 注解中type属性类型
+   */
+  private static Object parsingCell(Cell cell, FileAttributes fileAttributes)&#123;
+      if (cell==null)&#123;
+          return null;
+      &#125;
+      Class type = fileAttributes.type();
+      if (type ==Date.class)&#123;
+          return cell.getDateCellValue();
+      &#125;else if(type== boolean.class)&#123;
+          return cell.getBooleanCellValue();
+      &#125;else if(type==double.class)&#123;
+          return cell.getNumericCellValue();
+      &#125;else if(type== RichTextString.class)&#123;
+          return cell.getRichStringCellValue();
+      &#125;else if(type==Integer.class)&#123;
+          String stringCellValue = cell.getStringCellValue();
+          return Integer.parseInt(stringCellValue);
+      &#125; else&#123;
+          try &#123;
+              return cell.getStringCellValue();
+          &#125;catch (Exception e)&#123;
+              if (cell.getCellType()==CellType.NUMERIC) &#123;
+                  return &quot;&quot;+cell.getNumericCellValue();
+              &#125;
+              return &quot;&quot;;
+          &#125;
+      &#125;
+  &#125;
+&#125;</code></pre>
+<h1 id="四、代码实现了，是不是已经迫不及待想试试水了呢"><a href="#四、代码实现了，是不是已经迫不及待想试试水了呢" class="headerlink" title="四、代码实现了，是不是已经迫不及待想试试水了呢"></a>四、代码实现了，是不是已经迫不及待想试试水了呢</h1><p>接下来我们测试一下</p>
+<h3 id="用户表-xlsx："><a href="#用户表-xlsx：" class="headerlink" title="用户表.xlsx："></a>用户表.xlsx：</h3><p><img src="https://img-blog.csdnimg.cn/2020090813233180.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDM1NTg1NQ==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="五、解析过程"><a href="#五、解析过程" class="headerlink" title="五、解析过程"></a>五、解析过程</h1><p>我们来写一个优雅的main方法测试一下这个工具类行不行</p>
+<pre><code>public static void main(String[] args) throws IOException, IllegalAccessException, InstantiationException &#123;
+    List&lt;Object&gt; objects = parsingFileXls(new FileInputStream(new File(&quot;G:\\用户表.xlsx&quot;)), FILE_CONTENT_TYPE_XLSX, User.class);
+    objects.forEach(System.out::println);
+&#125;</code></pre>
+<p>果然行！！！</p>
+<pre><code>User(id=1.0, username= 张三, password=2sd3tg5)
+User(id=2.0, username= 李四, password=42freg43)
+User(id=3.0, username= 王五, password=2d3d)
+User(id=4.0, username= 赵六, password= asdad)
+User(id=5.0, username= 刘七, password= sefwe)
+User(id=6.0, username= kk, password= 21edwq)
+User(id=7.0, username= sx, password= dewr3r)
+User(id=8.0, username= aa, password= wegt6y)
+User(id=9.0, username= bb, password= qwed2qw)
+User(id=10.0, username= cc, password= 21edwq)</code></pre>
+<p>收好你们的对象噢~</p>
+
+	</div>
+	<div class="meta split">
+		
+			<span>本文总阅读量 <span id="busuanzi_value_page_pv"></span> 次</span>
+		
+		<time class="post-date" datetime="2020-09-09T03:07:40.000Z" itemprop="datePublished">2020-09-09</time>
+	</div>
+	<!-- //评论 -->
+	<!-- <div id="container"></div>
+	<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+	<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+	<script>
+	var gitment = new Gitment({
+		owner: '8abe807a7eec14fcbe3dbbe48483a61f0d32008a ',
+		repo: 'kk-arch.github.io',
+		oauth: {
+			client_id: 'f8539174d7a553475267',
+			client_secret: '0d6ca0b43bdc1dbdf34f85ef212726f56a8a1e0a',
+		},
+	})
+	gitment.render('container') -->
+	</script>
+
+</article>
+
+<!--评论-->
+
+
+  
+</div>
+
+
+  <svg id="bigTriangleColor" width="100%" height="40" viewBox="0 0 100 102" preserveAspectRatio="none">
+    <path d="M0 0 L50 100 L100 0 Z"></path>
+  </svg>
+
+  
+
+
+  <div class="wrapper"></div>
+
+
+
+
+
+<div class="fat-footer">
+	<div class="wrapper">
+		<div class="layout layout--center">
+			<div class="layout__item palm-mb">
+				<div class="media">
+					<img class="headimg" src='/banner/k4.png' alt='k'>
+					<div class="media__body">
+						<h4>一个懒人..</h4>
+						<p class='site-description'>Stay Hungry,Stay Sober.</p>
+					</div>
+				</div>
+				<div class="author-contact">
+					<ul>
+						
+							
+							<li>
+				        		<a href="http://weibo.com/" target="_blank">
+				        			
+				        				<i class="iconfont icon-weibo"></i>
+				        			
+				        		</a>
+				        	</li>
+						
+							
+							<li>
+				        		<a href="https://github.com/" target="_blank">
+				        			
+				        				<i class="iconfont icon-github"></i>
+				        			
+				        		</a>
+				        	</li>
+						
+							
+							<li>
+				        		<a href="https://www.zhihu.com/" target="_blank">
+				        			
+										<i class="iconfont icon-zhihu"></i>
+				        			
+				        		</a>
+				        	</li>
+						
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<footer class="footer" role="contentinfo">
+	<div class="wrapper wrapper--wide split split--responsive">
+		
+			<!-- <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span> -->
+			<span>本站总访问量 <span id="busuanzi_value_site_pv"></span> 次, 访客数 <span id="busuanzi_value_site_uv"></span> 人次</span>
+		
+		<!-- <span>Theme by <a target="_blank" rel="noopener" href="http://github.com/kk-arch">justpsvm</a>. Powered by <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></span> -->
+	</div>
+</footer>
+
+	<!-－这里导入了 lib.js 里面涵盖了 jQuery 等框架 所以注释掉-->
+	<!--
+<script src="http://lib.sinaapp.com/js/jquery/2.0/jquery.min.js"></script>
+-->
+	
+<script src="/js/lib.js"></script>
+
+	
+<script src="/js/google-code-prettify/prettify.js"></script>
+
+	
+<script src="/js/module.js"></script>
+
+	
+<script src="/js/script.js"></script>
+
+	
+		<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+	
+	<script type='text/javascript'>
+		//代码高亮
+		$(document).ready(function(){
+	 		$('pre').addClass('prettyprint linenums').attr('style', 'overflow:auto;');
+   			prettyPrint();
+		});
+	</script>
+	</body>
+</html>
