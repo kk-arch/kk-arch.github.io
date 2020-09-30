@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <title>springboot为什么可以省去配置Tomcat的步骤? | K&#39;s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+      <link rel="icon" href="/banner/k3.png">
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<link rel="stylesheet" href="/js/google-code-prettify/tomorrow-night-eighties.min.css">
+
+
+  <meta name="generator" content="Hexo 5.0.2"></head>
+
+  <body>
+
+<header>
+	<a id="logo" href="/" title="K&#39;s blog">
+	<img class="headimg" src="/banner/狗.jpg" alt="K&#39;s blog"></a>
+	
+	
+		<!--搜索栏-->
+		<i class="js-toggle-search iconfont icon-search"></i>
+
+
+<form class="js-search search-form search-form--modal" method="get" action="http://gushi.li" role="search">
+	<div class="search-form__inner">
+		<div>
+			<i class="iconfont icon-search"></i>
+			<input class="text-input" placeholder="Enter Key..." type="search">
+		</div>
+	</div>
+</form>
+	
+
+	
+		<!--侧边导航栏-->
+		<a id="nav-toggle" href="#"><span></span></a>
+
+<nav>
+	<div class="menu-top-container">
+		<ul id="menu-top" class="menu">
+			
+				
+				<li class="current-menu-item">
+					<a href="https://blog.csdn.net/weixin_44355855?t=1" target="_blank">欢迎到我的CSDN~</a>
+				</li>
+			
+		</ul>
+	</div>
+</nav>
+	
+
+</header>
+<div class="m-header ">
+	<section id="hero1" class="hero">
+		<div class="inner">
+		</div>
+	</section>
+	
+		<figure class="top-image" data-enable=true></figure>
+	
+</div>
+
+<!--文章列表-->
+<div class="wrapper">
+  
+    <!--文章-->
+<article>
+	
+  
+    <h1 class="post-title" itemprop="name">
+      springboot为什么可以省去配置Tomcat的步骤?
+    </h1>
+  
+
+	<div class='post-body mb'>
+		<p><font color=#999AAA >这篇文章探索一下springboot的tomcat是如何实现的</font></p>
+<!-- <hr style=" border:solid; width:100px; height:1px;" color=#000000 size=1"> -->
+
+<h1 id="一、起步依赖"><a href="#一、起步依赖" class="headerlink" title="一、起步依赖"></a>一、起步依赖</h1><p><strong>1.首先我们了解一下起步依赖</strong></p>
+<ul>
+<li>SpringBoot结合Maven管理，无需关注不同的依赖，不同版本是否存在冲突的问题。</li>
+<li>通过spring-boot-starter-parent、spring-boot-starter等实现依赖的传递、版本管理等</li>
+</ul>
+<p>SpringBoot存在大量的spring-boot-starter-xxx。这些依赖对某种或某类功能进行了组织，从而达到了起步依赖的目的。</p>
+<p><strong>2.上图直观的看依赖关系</strong></p>
+<p><img src="https://img-blog.csdnimg.cn/2020092811114471.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDM1NTg1NQ==,size_16,color_FFFFFF,t_70#pic_center"></p>
+<p>我们平常创建好一个SpringBoot项目初始化就会依赖一个spring-boot-starter，当我们想启动项目的时候，就必须在添上 <strong>-web</strong>让他成为一个spring-boot-starter-web项目。<br>为什么呢？，我们点击进去，这里看</p>
+<p><img src="https://img-blog.csdnimg.cn/20200928111724145.png#pic_center" alt="在这里插入图片描述"></p>
+<p>是了！它引入了tomcat的依赖，并且仔细观看后还有一些其它的依赖</p>
+<p><img src="https://img-blog.csdnimg.cn/20200928111850546.png#pic_center" alt="在这里插入图片描述"></p>
+<p>可以看到，当我们把第一层pom中的spring-boot-starter改变为了spring-boot-starter-web，进来后这个web中又引入了spring-boot-starter!</p>
+<p><img src="https://img-blog.csdnimg.cn/20200928111908833.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDM1NTg1NQ==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>这里也引入了webMVC的依赖</p>
+<h1 id="二、追踪源码"><a href="#二、追踪源码" class="headerlink" title="二、追踪源码"></a>二、追踪源码</h1><p>把pom中改成web项目后启动看看 这里成功启动了</p>
+<p><img src="https://img-blog.csdnimg.cn/20200928112856924.png#pic_center" alt="在这里插入图片描述"></p>
+<p>啊这，细心一点的话可以看到中间的路径类，发现目标**TomcatWebServer</p>
+<p><strong>1.TomcatWebServer</strong></p>
+<p><img src="https://img-blog.csdnimg.cn/20200928113412501.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDM1NTg1NQ==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>可以看到他有一个成员变量属性tomcat，并且实现了一个WebServer的接口，那这个WebServer的关系是什么样呢？</p>
+<p><img src="https://img-blog.csdnimg.cn/20200928113532142.png#pic_center" alt="在这里插入图片描述"></p>
+<p>这个接口原来不单单一个tomcat，还有其它可以代替tomcat的Web容器。<br>看它的构造方法，这个构造参数中的tomcat是谁传入进来的？</p>
+<pre><code>public TomcatWebServer(Tomcat tomcat, boolean autoStart) &#123;
+    this.monitor = new Object();
+    this.serviceConnectors = new HashMap();
+    Assert.notNull(tomcat, &quot;Tomcat Server must not be null&quot;);
+    this.tomcat = tomcat;
+    this.autoStart = autoStart;
+    this.initialize();
+&#125;</code></pre>
+<p>我们继续往下追踪</p>
+<p><strong>2.TomcatServletWebServerFactory</strong></p>
+<p>原来是这个类new了一个TomcatWebServer，并且传入了一个tomcat类。</p>
+<pre><code>protected TomcatWebServer getTomcatWebServer(Tomcat tomcat) &#123;
+    return new TomcatWebServer(tomcat, this.getPort() &gt;= 0);
+&#125;</code></pre>
+<p>那么TomcatServletWebServerFactory类中getTomcatWebServer的方法参数tomcat是谁传入的呢？我们接着找。</p>
+<p><img src="https://img-blog.csdnimg.cn/20200928114924671.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDM1NTg1NQ==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>阿，果然还是你，通过本类getWebServer方法返回值调用了getTomcatWebServer，那么看看这个日日念念的tomcat是怎么来的呢</p>
+<p>原来是在这个方法中new了一个tomcat对象！</p>
+<h1 id="三、结尾"><a href="#三、结尾" class="headerlink" title="三、结尾"></a>三、结尾</h1><p>我们再来看TomcatWebServer的构造方法</p>
+<pre><code>public TomcatWebServer(Tomcat tomcat, boolean autoStart) &#123;
+    this.monitor = new Object();
+    this.serviceConnectors = new HashMap();
+    Assert.notNull(tomcat, &quot;Tomcat Server must not be null&quot;);
+    this.tomcat = tomcat; //赋值给类中属性
+    this.autoStart = autoStart;
+    this.initialize();//初始化方法
+&#125;</code></pre>
+<p>现在应该知道了吧，其实底层就是<strong>new</strong>了一个<strong>tomcat</strong>对象。经过这样一轮传值传到这个类的构造方法，然后赋值给这个类中的<strong>tomcat</strong>成员变量，最后调用初始化方法即可<br>来看看初始化 <strong>initialize()</strong> 方法</p>
+<p><img src="https://img-blog.csdnimg.cn/20200928120104106.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDM1NTg1NQ==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>调用这个方法，其中start()启动了，并且设置了守护线程防止闪退。</p>
+<h3 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h3><p>这里是我理解的一个流程图，这篇所说的大概就包含这些了</p>
+<p><img src="https://img-blog.csdnimg.cn/20200930112107153.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDM1NTg1NQ==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>好了，不知道看完这篇是不是对SpringBoot中内嵌式容器tomcat有点点的了解了，如果有错误之处，欢迎指点，我们下期见。</p>
+
+	</div>
+	<div class="meta split">
+		
+			<span>本文总阅读量 <span id="busuanzi_value_page_pv"></span> 次</span>
+		
+		<time class="post-date" datetime="2020-09-30T02:55:20.000Z" itemprop="datePublished">2020-09-30</time>
+	</div>
+	<!-- //评论 -->
+	<!-- <div id="container"></div>
+	<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+	<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+	<script>
+	var gitment = new Gitment({
+		owner: '8abe807a7eec14fcbe3dbbe48483a61f0d32008a ',
+		repo: 'kk-arch.github.io',
+		oauth: {
+			client_id: 'f8539174d7a553475267',
+			client_secret: '0d6ca0b43bdc1dbdf34f85ef212726f56a8a1e0a',
+		},
+	})
+	gitment.render('container') -->
+	</script>
+
+</article>
+
+<!--评论-->
+
+
+  
+</div>
+
+
+  <svg id="bigTriangleColor" width="100%" height="40" viewBox="0 0 100 102" preserveAspectRatio="none">
+    <path d="M0 0 L50 100 L100 0 Z"></path>
+  </svg>
+
+  
+
+
+  <div class="wrapper"></div>
+
+
+
+
+
+<div class="fat-footer">
+	<div class="wrapper">
+		<div class="layout layout--center">
+			<div class="layout__item palm-mb">
+				<div class="media">
+					<img class="headimg" src='/banner/动漫1.jpg' alt='k'>
+					<div class="media__body">
+						<h4>喝口可乐吧。</h4>
+						<p class='site-description'>Stay Hungry,Stay Sober.</p>
+					</div>
+				</div>
+				<div class="author-contact">
+					<ul>
+						
+							
+							<li>
+				        		<a href="http://weibo.com/" target="_blank">
+				        			
+				        				<i class="iconfont icon-weibo"></i>
+				        			
+				        		</a>
+				        	</li>
+						
+							
+							<li>
+				        		<a href="https://github.com/" target="_blank">
+				        			
+				        				<i class="iconfont icon-github"></i>
+				        			
+				        		</a>
+				        	</li>
+						
+							
+							<li>
+				        		<a href="https://www.zhihu.com/" target="_blank">
+				        			
+										<i class="iconfont icon-zhihu"></i>
+				        			
+				        		</a>
+				        	</li>
+						
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<footer class="footer" role="contentinfo">
+	<div class="wrapper wrapper--wide split split--responsive">
+		
+			<!-- <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span> -->
+			<span>本站总访问量 <span id="busuanzi_value_site_pv"></span> 次, 访客数 <span id="busuanzi_value_site_uv"></span> 人次</span>
+		
+		<!-- <span>Theme by <a target="_blank" rel="noopener" href="http://github.com/kk-arch">justpsvm</a>. Powered by <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></span> -->
+	</div>
+</footer>
+
+	<!-－这里导入了 lib.js 里面涵盖了 jQuery 等框架 所以注释掉-->
+	<!--
+<script src="http://lib.sinaapp.com/js/jquery/2.0/jquery.min.js"></script>
+-->
+	
+<script src="/js/lib.js"></script>
+
+	
+<script src="/js/google-code-prettify/prettify.js"></script>
+
+	
+<script src="/js/module.js"></script>
+
+	
+<script src="/js/script.js"></script>
+
+	
+		<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+	
+	<script type='text/javascript'>
+		//代码高亮
+		$(document).ready(function(){
+	 		$('pre').addClass('prettyprint linenums').attr('style', 'overflow:auto;');
+   			prettyPrint();
+		});
+	</script>
+	</body>
+</html>
